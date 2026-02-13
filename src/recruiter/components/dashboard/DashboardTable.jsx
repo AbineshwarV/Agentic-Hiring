@@ -9,7 +9,6 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-/* ---------- Score Pill ---------- */
 function ScorePill({ score }) {
   if (score === null || score === undefined) {
     return <span className="text-muted-foreground">-</span>
@@ -41,100 +40,65 @@ export default function DashboardTable({ candidates, onView }) {
   return (
     <div className="rounded-xl border bg-background shadow-sm overflow-hidden">
 
-      {/* Card Header */}
       <div className="px-6 py-4 border-b">
         <h2 className="text-lg font-semibold text-slate-900">
           Candidates
         </h2>
       </div>
 
-      {/* 🔒 Card-only horizontal scroll */}
       <div className="overflow-x-auto pb-2">
-        <Table className="min-w-[1100px]">
+        <Table className="min-w-[1200px]">
 
-          {/* ===== TABLE HEADER ===== */}
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[70px] pl-6 font-semibold">
-                Rank
-              </TableHead>
-              <TableHead className="w-[180px] font-semibold">
-                Candidate
-              </TableHead>
-              <TableHead className="w-[260px] font-semibold">
-                Job Description
-              </TableHead>
-              <TableHead className="w-[140px] font-semibold">
-                Tier
-              </TableHead>
-              <TableHead className="w-[220px] font-semibold">
-                Status
-              </TableHead>
-              <TableHead className="w-[180px] font-semibold">
-                Score
-              </TableHead>
-              <TableHead className="w-[90px] pr-6 text-right font-semibold">
+              <TableHead className="pl-6 w-[70px]">Rank</TableHead>
+              <TableHead className="w-[180px]">Candidate</TableHead>
+              <TableHead className="w-[200px]">Job Role</TableHead>
+              <TableHead className="w-[160px]">Company</TableHead>
+              <TableHead className="w-[160px]">Status</TableHead>
+              <TableHead className="w-[180px]">Score</TableHead>
+              <TableHead className="pr-6 w-[90px] text-right">
                 Details
               </TableHead>
             </TableRow>
           </TableHeader>
 
-          {/* ===== TABLE BODY ===== */}
           <TableBody>
             {candidates.map((c, index) => (
-              <TableRow
-                key={c.id}
-                className="hover:bg-muted/40 transition"
-              >
-                {/* Rank */}
+              <TableRow key={c.id} className="hover:bg-muted/40">
                 <TableCell className="pl-6 font-semibold">
                   #{index + 1}
                 </TableCell>
 
-                {/* Candidate */}
                 <TableCell className="font-medium">
                   {c.full_name}
                 </TableCell>
 
-                {/* Job */}
-                <TableCell className="truncate">
-                  {c.job_description}
-                </TableCell>
+                <TableCell>{c.job_description}</TableCell>
 
-                {/* Tier */}
-                <TableCell>
-                  <Badge
-                    type={
-                      c.tier === "Excellent"
-                        ? "success"
-                        : c.tier === "Good"
-                        ? "warning"
-                        : "danger"
-                    }
-                    label={c.tier}
-                  />
+                {/* ✅ COMPANY */}
+                <TableCell className="font-medium">
+                  {c.company_name}
                 </TableCell>
 
                 {/* Status */}
                 <TableCell>
                   <Badge
                     type={
-                      c.action.includes("REJECT")
-                        ? "danger"
-                        : c.action.includes("INTERVIEW")
+                      c.action === "Selected"
                         ? "success"
+                        : c.action === "Rejected"
+                        ? "danger"
                         : "warning"
                     }
                     label={c.action}
                   />
                 </TableCell>
 
-                {/* Score */}
                 <TableCell>
                   <ScorePill score={c.score} />
                 </TableCell>
 
-                {/* Details */}
                 <TableCell className="pr-6 text-right">
                   <button
                     onClick={() => onView(c)}

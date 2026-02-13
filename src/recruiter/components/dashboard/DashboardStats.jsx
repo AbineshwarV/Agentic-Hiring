@@ -2,13 +2,11 @@ import { Users, CheckCircle, XCircle } from "lucide-react"
 
 function StatCard({ title, value, icon: Icon }) {
   return (
-    <div
-      className="
-        rounded-xl border
-        bg-gradient-to-r from-slate-50/60 via-orange-50/40 to-emerald-50/60
-        p-6 shadow-sm ring-1 ring-black/5
-      "
-    >
+    <div className="
+      rounded-xl border
+      bg-gradient-to-r from-slate-50/60 via-orange-50/40 to-emerald-50/60
+      p-6 shadow-sm ring-1 ring-black/5
+    ">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm text-muted-foreground">{title}</p>
@@ -21,7 +19,6 @@ function StatCard({ title, value, icon: Icon }) {
     </div>
   )
 }
-
 
 export default function DashboardStats({ stats }) {
   return (

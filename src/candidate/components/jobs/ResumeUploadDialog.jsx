@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-export default function ResumeUploadModal({ open, onClose }) {
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+
+export default function ResumeUploadModal({ open, onClose, jobId }) {
   const [file, setFile] = useState(null)
   const [fileName, setFileName] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -16,6 +18,7 @@ export default function ResumeUploadModal({ open, onClose }) {
     email: "",
     linkedin: "",
     github: "",
+    experience: "", // ✅ added
   })
 
   // Prevent background scroll
@@ -28,12 +31,23 @@ export default function ResumeUploadModal({ open, onClose }) {
   if (!open) return null
 
   const handleChange = (field, value) => {
-    setForm((prev) => ({ ...prev, [field]: value }))
+    setForm(prev => ({ ...prev, [field]: value }))
   }
 
   const handleSubmit = async () => {
-    if (!file || !form.full_name || !form.email || !form.mobile) {
-      alert("Please fill all required fields and upload resume")
+    if (!jobId) {
+      alert("Job ID missing. Please try again.")
+      return
+    }
+
+    if (
+      !file ||
+      !form.full_name ||
+      !form.email ||
+      !form.mobile ||
+      form.experience === ""
+    ) {
+      alert("Please fill all required fields")
       return
     }
 
@@ -41,46 +55,39 @@ export default function ResumeUploadModal({ open, onClose }) {
       setLoading(true)
 
       const formData = new FormData()
-      formData.append("file", file)
-      formData.append("full_name", form.full_name)
-      formData.append("mobile", form.mobile)
+      formData.append("name", form.full_name)
       formData.append("email", form.email)
+      formData.append("mobile", form.mobile)
       formData.append("linkedin", form.linkedin)
       formData.append("github", form.github)
+      formData.append("experience", Number(form.experience))
+      formData.append("resume_pdf", file)
 
-      const response = await fetch(
-        "http://localhost:5000/api/upload-and-store",
+      console.log("Applying for jobId:", jobId)
+
+      const res = await fetch(
+        `${API_BASE_URL}/apply/${jobId}`,
         {
           method: "POST",
           body: formData,
         }
       )
 
-      if (!response.ok) {
-        throw new Error("Upload failed")
+      if (!res.ok) {
+        throw new Error(`Apply failed: ${res.status}`)
       }
 
-      alert("Application submitted successfully 🎉")
+      alert("✅ Application submitted successfully")
       onClose()
 
-      // Reset form
-      setFile(null)
-      setFileName(null)
-      setForm({
-        full_name: "",
-        mobile: "",
-        email: "",
-        linkedin: "",
-        github: "",
-      })
-
     } catch (err) {
-      console.error(err)
-      alert("Something went wrong. Please try again.")
+      console.error("Apply error:", err)
+      alert("❌ Failed to submit application")
     } finally {
       setLoading(false)
     }
   }
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -104,13 +111,7 @@ export default function ResumeUploadModal({ open, onClose }) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div
-          className="
-            relative border-b
-            bg-gradient-to-r from-sky-50 via-indigo-50 to-purple-50
-            px-4 sm:px-6 py-4
-          "
-        >
+        <div className="relative border-b bg-gradient-to-r from-sky-50 via-indigo-50 to-purple-50 px-4 sm:px-6 py-4">
           <h2 className="text-base sm:text-xl font-semibold text-gray-800">
             Submit Your Application
           </h2>
@@ -120,30 +121,14 @@ export default function ResumeUploadModal({ open, onClose }) {
 
           <button
             onClick={onClose}
-            aria-label="Close modal"
-            className="
-              absolute top-3 right-3
-              h-10 w-10 sm:h-8 sm:w-8
-              rounded-full
-              flex items-center justify-center
-              bg-white/70 backdrop-blur
-              text-gray-600
-              hover:bg-gray-200
-              active:bg-gray-300
-            "
+            className="absolute top-3 right-3 h-10 w-10 sm:h-8 sm:w-8 rounded-full flex items-center justify-center bg-white/70"
           >
             <X className="h-5 w-5 sm:h-4 sm:w-4" />
           </button>
         </div>
 
         {/* Body */}
-        <div
-          className="
-            flex-1 overflow-y-auto
-            px-4 sm:px-6 py-6
-            grid grid-cols-1 lg:grid-cols-2 gap-6
-          "
-        >
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* LEFT: Resume Upload */}
           <div className="space-y-3">
             <Label className="text-sm font-medium">
@@ -152,24 +137,11 @@ export default function ResumeUploadModal({ open, onClose }) {
 
             <Label
               htmlFor="resume"
-              className="
-                flex flex-col items-center justify-center
-                rounded-xl border border-dashed
-                bg-gradient-to-br from-gray-50 to-slate-50
-                p-8 sm:p-10
-                text-center cursor-pointer
-                hover:border-indigo-400 transition
-              "
+              className="flex flex-col items-center justify-center rounded-xl border border-dashed p-8 sm:p-10 cursor-pointer"
             >
-              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100">
-                <Upload className="h-6 w-6 text-indigo-600" />
-              </div>
-
-              <p className="text-sm font-medium text-gray-800">
-                Drag & drop your resume
-              </p>
-
-              <p className="mt-1 text-xs text-muted-foreground">
+              <Upload className="h-6 w-6 mb-2 text-indigo-600" />
+              <p className="text-sm font-medium">Drag & drop your resume</p>
+              <p className="text-xs text-muted-foreground mt-1">
                 PDF only • Max 5MB
               </p>
             </Label>
@@ -180,16 +152,16 @@ export default function ResumeUploadModal({ open, onClose }) {
               accept=".pdf"
               className="hidden"
               onChange={(e) => {
-                const selectedFile = e.target.files[0]
-                if (selectedFile) {
-                  setFile(selectedFile)
-                  setFileName(selectedFile.name)
+                const f = e.target.files[0]
+                if (f) {
+                  setFile(f)
+                  setFileName(f.name)
                 }
               }}
             />
 
             {fileName && (
-              <p className="text-sm font-medium text-indigo-600 break-all text-center">
+              <p className="text-sm text-indigo-600 text-center">
                 Selected file: {fileName}
               </p>
             )}
@@ -206,7 +178,6 @@ export default function ResumeUploadModal({ open, onClose }) {
               <div>
                 <Label>Full Name *</Label>
                 <Input
-                  placeholder="John Doe"
                   value={form.full_name}
                   onChange={(e) =>
                     handleChange("full_name", e.target.value)
@@ -217,8 +188,6 @@ export default function ResumeUploadModal({ open, onClose }) {
               <div>
                 <Label>Mobile Number *</Label>
                 <Input
-                  type="tel"
-                  placeholder="+91 XXXXX XXXXX"
                   value={form.mobile}
                   onChange={(e) =>
                     handleChange("mobile", e.target.value)
@@ -229,8 +198,6 @@ export default function ResumeUploadModal({ open, onClose }) {
               <div className="sm:col-span-2">
                 <Label>Email *</Label>
                 <Input
-                  type="email"
-                  placeholder="john@example.com"
                   value={form.email}
                   onChange={(e) =>
                     handleChange("email", e.target.value)
@@ -238,10 +205,23 @@ export default function ResumeUploadModal({ open, onClose }) {
                 />
               </div>
 
+              {/* ✅ EXPERIENCE FIELD (added, same grid) */}
+              <div>
+                <Label>Experience (Years) *</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  placeholder="e.g. 2"
+                  value={form.experience}
+                  onChange={(e) =>
+                    handleChange("experience", e.target.value)
+                  }
+                />
+              </div>
+
               <div>
                 <Label>LinkedIn</Label>
                 <Input
-                  placeholder="linkedin.com/in/username"
                   value={form.linkedin}
                   onChange={(e) =>
                     handleChange("linkedin", e.target.value)
@@ -252,7 +232,6 @@ export default function ResumeUploadModal({ open, onClose }) {
               <div>
                 <Label>GitHub</Label>
                 <Input
-                  placeholder="github.com/username"
                   value={form.github}
                   onChange={(e) =>
                     handleChange("github", e.target.value)

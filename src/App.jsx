@@ -10,6 +10,8 @@ import RecruiterLayout from "./recruiter/layout/RecruiterLayout"
 import RecruiterDashboard from "./recruiter/pages/Dashboard"
 import RecruiterJobs from "./recruiter/pages/Jobs"
 import AnalyticsReport from "./recruiter/pages/AnalyticsReport"
+import FraudDetection from "./recruiter/pages/FraudDetection" 
+
 
 function App() {
   return (
@@ -29,6 +31,7 @@ function App() {
         <Route path="candidates" element={<>Candidates</>} />
         <Route path="interviews" element={<>Interviews</>} />
         <Route path="analytics" element={<AnalyticsReport />} />
+        <Route path="fraud-detection" element={<FraudDetection />} />
       </Route>
 
       {/* ================= FALLBACK ================= */}

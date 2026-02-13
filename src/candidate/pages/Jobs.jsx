@@ -13,33 +13,46 @@ export default function Jobs() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    async function fetchJobs() {
-      try {
-        const res = await fetch(`${API_BASE_URL}/api/jobs`)
-        const data = await res.json()
-
-        const mappedJobs = data.map(job => ({
-          id: job.id,
-          company: job.company_name,
-          role: job.job_title,
-          location: job.location,
-          type: job.employment_type,
-          salary: job.salary_range,
-        }))
-
-        setJobs(mappedJobs)
-      } catch (err) {
-        console.error("Failed to fetch jobs", err)
-      } finally {
-        setLoading(false)
-      }
-    }
-
     fetchJobs()
   }, [])
 
-  /* 🔍 SEARCH + FILTER (UNCHANGED) */
-  const filteredJobs = jobs.filter((job) => {
+  async function fetchJobs() {
+    try {
+      setLoading(true)
+
+      const res = await fetch(
+        `${API_BASE_URL}/job/?skip=0&limit=100`
+      )
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`)
+      }
+
+      const data = await res.json()
+
+      // ✅ correct mapping
+      const mappedJobs = data.jobs.map(job => ({
+        id: job.id,
+        companyId: job.company_id,
+        company: job.company_name,
+        role: job.role,
+        location: job.location || "Remote",
+        type: job.employment_type,
+        salary: job.salary || "Not disclosed",
+      }))
+
+      setJobs(mappedJobs)
+
+    } catch (err) {
+      console.error("Failed to fetch jobs:", err)
+      setJobs([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  /* 🔍 SEARCH + FILTER */
+  const filteredJobs = jobs.filter(job => {
     const matchesSearch =
       job.role.toLowerCase().includes(search.toLowerCase()) ||
       job.company.toLowerCase().includes(search.toLowerCase())
@@ -70,7 +83,7 @@ export default function Jobs() {
 
       <div className="grid gap-4">
         {filteredJobs.length > 0 ? (
-          filteredJobs.map((job) => (
+          filteredJobs.map(job => (
             <JobCard key={job.id} job={job} />
           ))
         ) : (
@@ -79,11 +92,11 @@ export default function Jobs() {
               <SearchX className="h-6 w-6 text-muted-foreground" />
             </div>
 
-            <h3 className="text-sm font-semibold text-foreground">
+            <h3 className="text-sm font-semibold">
               No jobs found
             </h3>
             <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-              Try adjusting your search or filter to find more opportunities.
+              Try adjusting your search or filter.
             </p>
           </div>
         )}

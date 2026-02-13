@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { Briefcase } from "lucide-react"
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+const API_URL = "https://agentic-v2-0.onrender.com/candidate/master/all"
 
 export default function AppliedJobsSummary() {
   const [count, setCount] = useState(0)
@@ -10,15 +10,13 @@ export default function AppliedJobsSummary() {
   useEffect(() => {
     async function fetchAppliedJobs() {
       try {
-        const res = await fetch(
-          `${API_BASE_URL}/api/candidates_with_analysis`
-        )
+        const res = await fetch(API_URL)
         const data = await res.json()
 
-        const uniqueIds = new Set(data.map(item => item.id))
-        setCount(uniqueIds.size)
+        // 👇 directly take total_candidates
+        setCount(data.total_candidates ?? 0)
       } catch (err) {
-        console.error(err)
+        console.error("Failed to fetch applied jobs:", err)
       } finally {
         setLoading(false)
       }
@@ -40,7 +38,7 @@ export default function AppliedJobsSummary() {
         </p>
       </div>
 
-      {/* Right (BOLD) */}
+      {/* Right */}
       <p className="text-sm font-semibold text-foreground">
         {loading ? "…" : `${count} Jobs applied`}
       </p>

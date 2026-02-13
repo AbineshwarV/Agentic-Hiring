@@ -48,6 +48,7 @@ export default function JobCard({ job }) {
       <ResumeUploadModal
         open={open}
         onClose={() => setOpen(false)}
+        jobId={job.companyId}
       />
     </>
   )

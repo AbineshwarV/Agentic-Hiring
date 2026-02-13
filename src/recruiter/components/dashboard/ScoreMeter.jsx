@@ -6,7 +6,14 @@ export default function ScoreMeter({ label, value }) {
   return (
     <div className="flex flex-col items-center gap-1">
       <svg width="80" height="80">
-        <circle cx="40" cy="40" r={radius} stroke="#e5e7eb" strokeWidth="8" fill="none" />
+        <circle
+          cx="40"
+          cy="40"
+          r={radius}
+          stroke="#e5e7eb"
+          strokeWidth="8"
+          fill="none"
+        />
         <circle
           cx="40"
           cy="40"
@@ -19,12 +26,19 @@ export default function ScoreMeter({ label, value }) {
           strokeLinecap="round"
           transform="rotate(-90 40 40)"
         />
-        <text x="50%" y="50%" textAnchor="middle" dy=".3em"
-          className="text-sm font-semibold fill-slate-800">
+        <text
+          x="50%"
+          y="50%"
+          textAnchor="middle"
+          dy=".3em"
+          className="text-sm font-semibold fill-slate-800"
+        >
           {Math.round(value * 100)}%
         </text>
       </svg>
-      <span className="text-xs text-muted-foreground">{label}</span>
+      <span className="text-xs text-muted-foreground">
+        {label}
+      </span>
     </div>
   )
 }

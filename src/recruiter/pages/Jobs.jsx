@@ -14,47 +14,36 @@ import {
 import { Slider } from "@/components/ui/slider"
 
 export default function Jobs() {
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+  const BASE_URL = "https://agentic-v2-0.onrender.com"
 
   const [jdFile, setJdFile] = useState(null)
   const [loading, setLoading] = useState(false)
 
-  // ✅ Correct salary slider state
   const [salary, setSalary] = useState([6, 10])
 
   const [form, setForm] = useState({
     companyName: "",
-    jobTitle: "",
+    companyDescription: "",
+    role: "",
     location: "",
     experience: "",
-    employmentType: "",
-    department: "",
+    employmentType: "Full-time",
   })
 
-  const experienceOptions = [
-    "Fresher (0–1 yrs)",
-    "1–3 yrs",
-    "3–5 yrs",
-    "5–8 yrs",
-    "8+ yrs",
-  ]
+ const experienceOptions = [
+  { label: "Fresher (0–1 year)", value: 0 },
+  { label: "Junior (1–3 years)", value: 2 },
+  { label: "Mid-Level (3–5 years)", value: 4 },
+  { label: "Senior (5–8 years)", value: 6 },
+  { label: "Lead / Expert (8+ years)", value: 8 },
+]
 
   const employmentTypes = [
-    "Full Time",
-    "Part Time",
+    "Full-time",
+    "Part-time",
     "Contract",
     "Internship",
     "Remote",
-  ]
-
-  const departments = [
-    "Engineering",
-    "Product",
-    "Design",
-    "Marketing",
-    "Sales",
-    "HR",
-    "Finance",
   ]
 
   const handleChange = (field, value) => {
@@ -63,8 +52,7 @@ export default function Jobs() {
 
   const allFieldsFilled =
     jdFile &&
-    Object.values(form).every(v => v.trim() !== "") &&
-    salary.length === 2
+    Object.values(form).every(v => v !== "")
 
   const handleCreateJob = async () => {
     if (!allFieldsFilled) {
@@ -72,47 +60,63 @@ export default function Jobs() {
       return
     }
 
+    setLoading(true)
+
     try {
-      setLoading(true)
-
-      // 1️⃣ Upload JD
       const fd = new FormData()
-      fd.append("file", jdFile)
 
-      await fetch(
-        "https://agentic-hiring-prototype.onrender.com/api/v1/upload-jd",
-        { method: "POST", body: fd }
+      // Company
+      fd.append("company_name", form.companyName)
+      fd.append("company_description", form.companyDescription)
+
+      // Job
+      fd.append("role", form.role)
+      fd.append("location", form.location || "")
+      fd.append(
+        "salary",
+        `₹${salary[0]} – ₹${salary[1]} LPA`
+      )
+      fd.append("employment_type", form.employmentType)
+      fd.append(
+        "required_experience",
+        Number(form.experience)
       )
 
-      // 2️⃣ Save Job
-      await fetch(`${API_BASE_URL}/api/recruiter/job`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          recruiterId: 1, // temp
-          companyName: form.companyName,
-          jobTitle: form.jobTitle,
-          location: form.location,
-          experience: form.experience,
-          employmentType: form.employmentType,
-          department: form.department,
-          salaryRange: `₹${salary[0]} – ₹${salary[1]} LPA`,
-          jdFileName: jdFile.name,
-        }),
-      })
+      // JD PDF
+      fd.append("jd_pdf", jdFile)
 
-      alert("Job created successfully")
+      const res = await fetch(
+        `${BASE_URL}/job/create-with-company`,
+        {
+          method: "POST",
+          body: fd,
+        }
+      )
 
-      setForm({
-        companyName: "",
-        jobTitle: "",
-        location: "",
-        experience: "",
-        employmentType: "",
-        department: "",
-      })
-      setSalary([6, 10])
-      setJdFile(null)
+      // ✅ SUCCESS CONDITION (FIXED)
+      if (res.status >= 200 && res.status < 300) {
+        alert("✅ Job created successfully")
+
+        // reset
+        setForm({
+          companyName: "",
+          companyDescription: "",
+          role: "",
+          location: "",
+          experience: "",
+          employmentType: "Full-time",
+        })
+        setSalary([6, 10])
+        setJdFile(null)
+        return
+      }
+
+      // ❌ real failure
+      throw new Error(`API failed: ${res.status}`)
+
+    } catch (err) {
+      console.error("Create Job Error:", err)
+      alert("❌ Failed to create job")
     } finally {
       setLoading(false)
     }
@@ -121,133 +125,106 @@ export default function Jobs() {
   return (
     <div className="space-y-5 max-w-3xl ml-6">
 
-      {/* HEADER */}
       <div>
-        <h1 className="text-base font-semibold text-slate-900">
+        <h1 className="text-base font-semibold">
           Create Job
         </h1>
         <p className="text-xs text-slate-500">
-          Upload JD and job details
+          Company & Job in one step
         </p>
       </div>
 
-      {/* FORM CARD */}
-      <div className="rounded-xl border border-slate-300 bg-white shadow-sm">
+      <div className="rounded-xl border bg-white shadow-sm">
         <div className="p-5 space-y-6">
 
-          {/* ✅ JD UPLOAD — FIXED */}
+          {/* JD Upload */}
           <div className="space-y-1.5">
-            <Label htmlFor="jd-upload" className="text-xs font-medium">
-              Job Description *
-            </Label>
+            <Label className="text-xs">Job Description *</Label>
 
-            <label
-              htmlFor="jd-upload"
-              className="flex items-center justify-between gap-4 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-3 cursor-pointer hover:border-indigo-500 transition"
-            >
-              <div className="flex items-center gap-3 pointer-events-none">
+            <label className="flex justify-between items-center border border-dashed rounded-lg px-4 py-3 cursor-pointer">
+              <div className="flex items-center gap-3">
                 <Upload className="h-4 w-4 text-indigo-600" />
-                <p className="text-sm truncate">
-                  {jdFile ? jdFile.name : "Upload JD (PDF, max 5MB)"}
-                </p>
+                <span className="text-sm truncate">
+                  {jdFile ? jdFile.name : "Upload JD (PDF)"}
+                </span>
               </div>
-
-              <span className="text-xs font-medium text-indigo-600 pointer-events-none">
+              <span className="text-xs text-indigo-600">
                 Browse
               </span>
+              <Input
+                type="file"
+                accept=".pdf"
+                className="hidden"
+                onChange={e => setJdFile(e.target.files[0])}
+              />
             </label>
-
-            <Input
-              id="jd-upload"
-              type="file"
-              accept=".pdf"
-              className="hidden"
-              onChange={(e) => setJdFile(e.target.files[0])}
-            />
           </div>
 
-          {/* JOB INFO */}
+          {/* Form */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
             <InputField
               label="Company Name"
-              placeholder="e.g. Acme Technologies"
               value={form.companyName}
-              onChange={(v) => handleChange("companyName", v)}
+              onChange={v => handleChange("companyName", v)}
             />
 
             <InputField
-              label="Job Title"
-              placeholder="e.g. Frontend Developer"
-              value={form.jobTitle}
-              onChange={(v) => handleChange("jobTitle", v)}
+              label="Company Description"
+              value={form.companyDescription}
+              onChange={v => handleChange("companyDescription", v)}
+            />
+
+            <InputField
+              label="Job Role"
+              value={form.role}
+              onChange={v => handleChange("role", v)}
             />
 
             <InputField
               label="Location"
-              placeholder="e.g. Chennai / Remote"
               value={form.location}
-              onChange={(v) => handleChange("location", v)}
+              onChange={v => handleChange("location", v)}
             />
 
             <SelectField
               label="Experience"
               value={form.experience}
               options={experienceOptions}
-              onChange={(v) => handleChange("experience", v)}
+              onChange={v => handleChange("experience", v)}
             />
 
             <SelectField
-              label="Employment"
+              label="Employment Type"
               value={form.employmentType}
-              options={employmentTypes}
-              onChange={(v) => handleChange("employmentType", v)}
+              options={employmentTypes.map(t => ({
+                label: t,
+                value: t,
+              }))}
+              onChange={v => handleChange("employmentType", v)}
             />
 
-            <SelectField
-              label="Department"
-              value={form.department}
-              options={departments}
-              onChange={(v) => handleChange("department", v)}
-            />
-
-            {/* ✅ SALARY SLIDER — CORRECTED */}
-            <div className="md:col-span-2 space-y-3">
-              <div className="flex justify-between">
-                <Label className="text-xs">Salary Range (LPA) *</Label>
-                <span className="text-xs font-semibold text-slate-700">
-                  ₹{salary[0]} – ₹{salary[1]} LPA
-                </span>
-              </div>
-
+            {/* Salary */}
+            <div className="md:col-span-2 space-y-2">
+              <Label className="text-xs">Salary (LPA)</Label>
               <Slider
                 value={salary}
-                onValueChange={(value) => {
-                  if (value[0] <= value[1]) setSalary(value)
-                }}
+                onValueChange={setSalary}
                 min={2}
                 max={50}
                 step={0.5}
-                minStepsBetweenThumbs={1}
               />
-
-              <div className="flex justify-between text-[11px] text-slate-500">
-                <span>₹2</span>
-                <span>₹10</span>
-                <span>₹20</span>
-                <span>₹30</span>
-                <span>₹40</span>
-                <span>₹50</span>
-              </div>
+              <p className="text-xs">
+                ₹{salary[0]} – ₹{salary[1]} LPA
+              </p>
             </div>
           </div>
 
-          {/* ACTION */}
-          <div className="flex justify-end pt-4 border-t">
+          <div className="flex justify-end border-t pt-4">
             <Button
               onClick={handleCreateJob}
-              disabled={loading || !allFieldsFilled}
-              className="h-9 px-6 text-sm rounded-lg flex items-center gap-2"
+              disabled={loading}
+              className="flex gap-2"
             >
               <Sparkles className="h-4 w-4" />
               {loading ? "Creating..." : "Create Job"}
@@ -260,17 +237,16 @@ export default function Jobs() {
   )
 }
 
-/* ---------------- Reusable Fields ---------------- */
+/* --------- Reusable --------- */
 
-function InputField({ label, value, onChange, placeholder }) {
+function InputField({ label, value, onChange }) {
   return (
     <div className="space-y-1">
       <Label className="text-xs">{label} *</Label>
       <Input
         className="h-9"
         value={value}
-        placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={e => onChange(e.target.value)}
       />
     </div>
   )
@@ -286,8 +262,11 @@ function SelectField({ label, value, options, onChange }) {
         </SelectTrigger>
         <SelectContent>
           {options.map(opt => (
-            <SelectItem key={opt} value={opt}>
-              {opt}
+            <SelectItem
+              key={opt.value}
+              value={String(opt.value)}
+            >
+              {opt.label}
             </SelectItem>
           ))}
         </SelectContent>

@@ -2,8 +2,8 @@ import { NavLink } from "react-router-dom"
 import {
   LayoutGrid,
   Briefcase,
-  Users,
   BarChart3,
+  ShieldAlert,
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -85,15 +85,11 @@ export default function RecruiterSidebar() {
                 Forge
               </span>
             </span>
-
-            <div className="flex gap-1 group-data-[collapsible=icon]:hidden" />
           </div>
 
-          {/* 🔥 SEPARATOR MOVED UP */}
           <Separator className="mt-2 group-data-[collapsible=icon]:hidden" />
         </div>
       </SidebarHeader>
-
 
       {/* Navigation */}
       <SidebarContent>
@@ -103,15 +99,23 @@ export default function RecruiterSidebar() {
             icon={LayoutGrid}
             label="Dashboard"
           />
+
           <SidebarLink
             to="/recruiter/jobs"
             icon={Briefcase}
-            label="Create a Jobs"
+            label="Create Jobs"
           />
+
           <SidebarLink
             to="/recruiter/analytics"
             icon={BarChart3}
             label="Analytics Reports"
+          />
+          
+          <SidebarLink
+            to="/recruiter/fraud-detection"
+            icon={ShieldAlert}
+            label="Fraud Detection"
           />
         </SidebarMenu>
       </SidebarContent>

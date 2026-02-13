@@ -6,7 +6,9 @@ export default function Badge({ type, label }) {
   }
 
   return (
-    <span className={`px-2 py-1 rounded text-xs font-medium ${styles[type]}`}>
+    <span
+      className={`px-2 py-1 rounded text-xs font-medium ${styles[type]}`}
+    >
       {label}
     </span>
   )

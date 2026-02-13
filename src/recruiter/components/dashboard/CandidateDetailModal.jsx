@@ -2,6 +2,7 @@ import ScoreMeter from "./ScoreMeter"
 
 export default function CandidateDetailModal({ candidate, onClose }) {
   if (!candidate) return null
+
   const scores = candidate.scores || {}
 
   return (
@@ -52,14 +53,27 @@ export default function CandidateDetailModal({ candidate, onClose }) {
           Resume Analysis
         </h3>
 
-        {/* Scores */}
+        {/* ✅ REAL SCORES FROM API */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
-          <ScoreMeter label="Role Fit" value={scores.role_fit || 0} />
-          <ScoreMeter label="Composite Score" value={scores.composite_score || 0} />
-          <ScoreMeter label="Growth Potential" value={scores.growth_potential || 0} />
-          <ScoreMeter label="Execution Language" value={scores.execution_language || 0} />
-          <ScoreMeter label="Capability Strength" value={scores.capability_strength || 0} />
-          <ScoreMeter label="Domain Compatibility" value={scores.domain_compatibility || 0} />
+          <ScoreMeter
+            label="Role Fit"
+            value={scores.role_fit_score || 0}
+          />
+
+          <ScoreMeter
+            label="Domain Competency"
+            value={scores.domain_competency_score || 0}
+          />
+
+          <ScoreMeter
+            label="Experience Match"
+            value={scores.experience_level_compatibility || 0}
+          />
+
+          <ScoreMeter
+            label="Composite Score"
+            value={scores.composite_score || 0}
+          />
         </div>
       </div>
     </div>
