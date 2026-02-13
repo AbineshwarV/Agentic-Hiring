@@ -17,10 +17,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-const SidebarLink = ({ to, icon: Icon, label }) => {
+/* ================= Sidebar Link ================= */
+const SidebarLink = ({ to, icon: Icon, label, end }) => {
   return (
     <SidebarMenuItem>
-      <NavLink to={to} className="w-full">
+      <NavLink to={to} end={end} className="w-full">
         {({ isActive }) => (
           <Tooltip delayDuration={150}>
             <TooltipTrigger asChild>
@@ -68,6 +69,7 @@ const SidebarLink = ({ to, icon: Icon, label }) => {
   )
 }
 
+/* ================= Candidate Sidebar ================= */
 export default function CandidateSidebar() {
   return (
     <Sidebar collapsible="icon">
@@ -83,27 +85,26 @@ export default function CandidateSidebar() {
                 Forge
               </span>
             </span>
-
-
-            <div className="flex gap-1 group-data-[collapsible=icon]:hidden">
-            </div>
           </div>
         </div>
 
-        {/* ✅ Separator below header */}
         <Separator className="group-data-[collapsible=icon]:hidden" />
       </SidebarHeader>
 
       {/* Navigation */}
       <SidebarContent>
         <SidebarMenu className="gap-1 px-1 pt-2">
+          {/* Dashboard – EXACT MATCH */}
           <SidebarLink
             to="/candidate/dashboard"
             icon={LayoutGrid}
             label="Dashboard"
+            end
           />
+
+          {/* Child route */}
           <SidebarLink
-            to="/candidate/jobs"
+            to="/candidate/dashboard/jobs"
             icon={Briefcase}
             label="Jobs"
           />

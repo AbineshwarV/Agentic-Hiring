@@ -22,10 +22,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-const SidebarLink = ({ to, icon: Icon, label }) => {
+/* ================= Sidebar Link ================= */
+const SidebarLink = ({ to, icon: Icon, label, end }) => {
   return (
     <SidebarMenuItem>
-      <NavLink to={to} className="w-full">
+      <NavLink to={to} end={end} className="w-full">
         {({ isActive }) => (
           <Tooltip delayDuration={150}>
             <TooltipTrigger asChild>
@@ -49,14 +50,17 @@ const SidebarLink = ({ to, icon: Icon, label }) => {
                   )}
                 />
 
+                {/* Icon */}
                 <Icon className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-110" />
 
+                {/* Label */}
                 <span className="group-data-[collapsible=icon]:hidden">
                   {label}
                 </span>
               </SidebarMenuButton>
             </TooltipTrigger>
 
+            {/* Tooltip (collapsed sidebar) */}
             <TooltipContent
               side="right"
               className="hidden group-data-[collapsible=icon]:block"
@@ -70,6 +74,7 @@ const SidebarLink = ({ to, icon: Icon, label }) => {
   )
 }
 
+/* ================= Recruiter Sidebar ================= */
 export default function RecruiterSidebar() {
   return (
     <Sidebar collapsible="icon">
@@ -94,26 +99,29 @@ export default function RecruiterSidebar() {
       {/* Navigation */}
       <SidebarContent>
         <SidebarMenu className="gap-1 px-1 pt-2">
+          {/* Dashboard (EXACT MATCH) */}
           <SidebarLink
             to="/recruiter/dashboard"
             icon={LayoutGrid}
             label="Dashboard"
+            end
           />
 
+          {/* Child routes */}
           <SidebarLink
-            to="/recruiter/jobs"
+            to="/recruiter/dashboard/jobs"
             icon={Briefcase}
             label="Create Jobs"
           />
 
           <SidebarLink
-            to="/recruiter/analytics"
+            to="/recruiter/dashboard/analytics"
             icon={BarChart3}
             label="Analytics Reports"
           />
-          
+
           <SidebarLink
-            to="/recruiter/fraud-detection"
+            to="/recruiter/dashboard/fraud-detection"
             icon={ShieldAlert}
             label="Fraud Detection"
           />
